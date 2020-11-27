@@ -1,9 +1,15 @@
 import React, {useState} from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, FlatList, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import {Svg, Polygon} from 'react-native-svg';
+import {BlurView} from '@react-native-community/blur';
 import { images, icons, COLORS, FONTS, SIZES } from '../constants';
 
 const Home = () => {
+
+   const [showAddToBagModal, setShowBagToBagModal] = useState(false);
+   const [selectedItem, setSelectedItem] = useState(null);
+   const [selectedSize, setSelectedSize] = useState(null);
+
    // Dummy data
    const [trending, setTrending] = useState([
       {
@@ -93,6 +99,10 @@ const Home = () => {
       return (
          <TouchableOpacity
             style={{height: 240, width: 180, justifyContent: 'center', marginHorizontal: SIZES.base, ...trendingStyle}}
+            onPress={() => {
+               setSelectedItem(item)
+               setShowBagToBagModal(true)
+            }}
          >
             <Text style={{color: COLORS.gray, ...FONTS.h5}}>{item.type}</Text>
             <View
@@ -148,7 +158,8 @@ const Home = () => {
                flexDirection: 'row',
             }}
             onPress={() => {
-               console.log('renderRecentlyViewed pressed')
+               setSelectedItem(item);
+               setShowBagToBagModal(true)
             }}
          >
             <View style={{
@@ -176,6 +187,37 @@ const Home = () => {
                <Text style={{...FONTS.h3}}>{item.price}</Text>
             </View>
          </TouchableOpacity>
+      )
+   }
+
+   const renderShowSizes = () => {
+      return (
+         selectedItem.sizes.map((item, index) => {
+            return (
+               <TouchableOpacity
+                     key={index}
+                     style={{
+                        width: 35,
+                        height: 25,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginHorizontal: 5,
+                        marginBottom: 10,
+                        borderWidth: 1,
+                        borderColor: COLORS.white,
+                        borderRadius: 5,
+                        backgroundColor: selectedItem.sizes[index] == selectedSize ? COLORS.white : null
+                     }}
+                     onPress={() => {
+                        setSelectedSize(item)
+                     }}
+                  >
+                     <Text style={{color: selectedItem.sizes[index] == selectedSize ? COLORS.black : COLORS.white, ...FONTS.body4}}>
+                        {item}
+                     </Text>
+               </TouchableOpacity>
+            )
+         })
       )
    }
 
@@ -234,6 +276,100 @@ const Home = () => {
                />
             </View>
          </View>
+
+         {/* Modal */}
+
+         {selectedItem && (
+            <Modal
+               animationType='slide'
+               transparent={true}
+               visible={showAddToBagModal}
+            >
+               <BlurView
+                  style={{
+                     flex: 1,
+                     alignItems: 'center',
+                     justifyContent: 'center',
+                  }}
+                  blurType='light'
+                  blurAmmount={20}
+                  reducedTransparencyFallbackColor='white'
+               >
+                  {/* Button to close modal */}
+                  <TouchableOpacity
+                     style={styles.absolute}
+                     onPress={() => {
+                        setSelectedItem(null);
+                        setSelectedSize('');
+                        setShowBagToBagModal(false)
+                     }}
+                  ></TouchableOpacity>
+
+                  {/* Modal content */}
+                  <View
+                     style={{
+                        justifyContent: 'center',
+                        width: '85%',
+                        backgroundColor: selectedItem.bgColor,
+                        borderRadius: 10
+                     }}
+                  >
+                     <View style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginTop: -SIZES.padding * 2
+                     }}>
+                        <Image
+                           source={selectedItem.img}
+                           resizeMode='contain'
+                           style={{
+                              width: '90%',
+                              height: 170,
+                              transform: [
+                                 {rotate: '-15deg'}
+                              ]
+                           }}
+                        />
+                     </View>
+                     <Text style={{marginTop: SIZES.padding, marginHorizontal: SIZES.padding, color: COLORS.white, ...FONTS.body2}}>{selectedItem.name}</Text>
+                     <Text style={{marginTop: SIZES.padding / 2, marginHorizontal: SIZES.padding, color: COLORS.white, ...FONTS.body3}}>{selectedItem.type}</Text>
+                     <Text style={{marginTop: SIZES.radius, marginHorizontal: SIZES.padding, color: COLORS.white, ...FONTS.h2}}>{selectedItem.price}</Text>
+                     <View style={{
+                        flexDirection: 'row',
+                        marginTop: SIZES.radius,
+                        marginHorizontal: SIZES.padding
+                     }}>
+                        <View>
+                           <Text style={{color: COLORS.white, ...FONTS.body3}}>Select size</Text>
+                        </View>
+                        <View style={{flex: 1, flexWrap: 'wrap', flexDirection: 'row', marginLeft: SIZES.radius}}>
+                           {renderShowSizes()}
+                        </View>
+                     </View>
+
+                     <TouchableOpacity
+                        style={{
+                           width: '100%',
+                           height: 70,
+                           marginTop: SIZES.base,
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                           borderBottomLeftRadius: 10,
+                           borderBottomRightRadius: 10
+                        }}
+                        onPress={() => {
+                           setSelectedItem(null);
+                           setSelectedSize('');
+                           setShowBagToBagModal(false)
+                        }}
+                     >
+                        <Text style={{color: COLORS.white, ...FONTS.largeTitleBold}}>Add to bag</Text>
+                     </TouchableOpacity>
+                  </View>
+               </BlurView>
+            </Modal>
+         )}
       </View>
    )
 }
@@ -262,6 +398,13 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.43,
       shadowRadius: 9.51,
       elevation: 15
+   },
+   absolute: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
    }
 });
 
