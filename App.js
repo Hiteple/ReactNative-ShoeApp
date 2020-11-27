@@ -29,7 +29,7 @@ const App = () => {
                options={{
                   title: 'SHOE SELECTOR',
                   headerTintColor: COLORS.lightGray,
-                  headerTiteStyle: {
+                  headerTintStyle: {
                      ...FONTS.navTitle
                   },
                   headerLeft: ({onPress}) => (
